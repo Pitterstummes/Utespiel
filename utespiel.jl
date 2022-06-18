@@ -86,8 +86,9 @@ end
 function loopcheck(actual_boardpath) #check for equal boards (loops)
     for i in 1:length(actual_boardpath[1,1,:])-1
         if actual_boardpath[:,:,i] == actual_boardpath[:,:,end]
-            println("Loop detected: current board (nr ",length(actual_boardpath[1,1,:]),") is equal to nr ",i)
+            #println("Loop detected: current board (nr ",length(actual_boardpath[1,1,:]),") is equal to nr ",i)
             #break #maybe make this a comment to see multiple loops
+            global loopcounter += 1
             global loop = true
         end        
     end  
@@ -99,6 +100,7 @@ function restart_parameters() #restart parameters for new final while loop
     global move_path = Int8[]
     global loop = false
     global counter = 0
+    global loopcounter = 0
     return nothing
 end
 
@@ -146,6 +148,7 @@ end
 #    writedlm(io,parameter_path)
 #end
 
+show(stdout, "text/plain", board_path)
 
 #starting
 #load board like in level 1267
@@ -158,33 +161,40 @@ while keep_going #actual running code
         global parameter_path = get_parameters(board_path)
         global move_path = parameter_path[4,1]
     end
-    println(i)
-    println(move_path)
+    #if mod(i,10000) == 0
+    #    println(i)
+    #end
+    #println(move_path)
     if move_path[end] == 0 #no more moves
         move_path = move_path[1:end-1]
         move_path[end] -= 1
         parameter_path = parameter_path[:,:,1:end-1]
         board_path = board_path[:,:,1:end-1]
-        println("move_path is 0")
+        #println("move_path is 0")
     else
-        println("do magic")
+        #println("do magic")
         board_path = cat(board_path,domove(getmoves(parameter_path[:,:,end]),move_path[end]);dims=3)
         #println("domove")
         parameter_path = cat(parameter_path,get_parameters(board_path[:,:,end]);dims=3)
         #println("get_parameters")
         move_path = vcat(move_path,parameter_path[4,1,end])
-        println("move_path")
-        println(move_path)
+        #println("move_path")
+        #println(move_path)
         loopcheck(board_path)
         if loop #do something when a loop is deteceted
             move_path[end] -= 1
             global counter += 1
+            if loopcounter == 2
+                move_path[end] -= 1
+                global loopcounter = 0
+            end
+            global loopcounter = 0
             loop = false
         end
     end
-    if i >= 13500
-        sleep(0.1)
-    end
+    #if i >= 13500
+    #   sleep(0.1)
+    #end
     #if counter == 3
     #    break
     #end
