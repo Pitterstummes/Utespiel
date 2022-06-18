@@ -8,9 +8,6 @@ cd("C:\\Users\\paulk\\Documents\\Programmieren\\Julia\\Utespiel") #home
 #Color assignment
 #colors = ((1,"gelb"),(2,"grau"),(3,"dunkelblau"),(4,"pink"),(5,"orange"),(6,"rot"),(7,"bordeaux"),(8,"cyan"),(9,"lila"),(10,"grün"),(11,"hellblau"),(12,"schwarz"))
 
-#load board like in level 1267
-board = readdlm("level_1267.txt",Int8)
-
 #functions
 function get_parameters(actualboard) # get needed parameters
     parameters = zeros(Int8,18,14) #18*14 matrix containing startindex, value, multiplicity and targetindex.
@@ -80,17 +77,18 @@ function get_parameters(actualboard) # get needed parameters
 end
 
 function test_endcondition(parameters) #end final while loop, when end condition is met
-    if length(findall(==(3),parameters[3,:])) == 12 || i == 12 #part with i is for testing
+    if length(findall(==(3),parameters[3,:])) == 12 #|| i == 1 #part with i is for testing
         global keep_going = false
         println("Job done")
     end       
 end
 
 function loopcheck(actual_boardpath) #check for equal boards (loops)
-    for i in length(actual_boardpath[1,1,:])-1
+    for i in 1:length(actual_boardpath[1,1,:])-1
         if actual_boardpath[:,:,i] == actual_boardpath[:,:,end]
             println("Loop detected: current board (nr ",length(actual_boardpath[1,1,:]),") is equal to nr ",i)
-            break #maybe make this a comment to see multiple loops
+            #break #maybe make this a comment to see multiple loops
+            global loop = true
         end        
     end  
 end  
@@ -99,6 +97,8 @@ function restart_parameters() #restart parameters for new final while loop
     global keep_going = true
     global i = 0
     global move_path = Int8[]
+    global loop = false
+    global counter = 0
     return nothing
 end
 
@@ -119,6 +119,19 @@ function getmoves(parameters) #out: moveparameters: startcolum, targetcolumn, st
     return moveparameters
 end
 
+function domove(movepara,movenur)
+    actualboard = board_path[:,:,end] #get actual board
+    if movepara[movenur,5] == movepara[movenur,6]
+        movepara[movenur,5] -= 1
+    elseif movepara[movenur,5] == movepara[movenur,6]+1
+        movepara[movenur,5] -= 2
+    elseif movepara[movenur,5] == movepara[movenur,6]+2
+        movepara[movenur,5] -= 3
+    end
+    actualboard[movepara[movenur,3]:movepara[movenur,3]+movepara[movenur,5],movepara[movenur,1]] .= 0 #write zeros to startingpoint
+    actualboard[movepara[movenur,6]-movepara[movenur,5]:movepara[movenur,6],movepara[movenur,2]] .= movepara[movenur,4] #write values to targetpoint
+    return actualboard
+end
 
 #Comments
 #delete the last element of an vector
@@ -135,20 +148,46 @@ end
 
 
 #starting
-
+#load board like in level 1267
+board = readdlm("level_1267.txt",Int8)
 restart_parameters()
 
 while keep_going #actual running code
-    if i == 0
+    if i == 0 #Initializing
         global board_path = board
         global parameter_path = get_parameters(board_path)
-        global move_path = parameter_path[4,1,end]
-    else
-        global parameter_path = cat(parameter_path,get_parameters(board_path[:,:,end]);dims=3)
-        global move_path = hcat(move_path,parameter_path[4,1,end])
-        #global board_path = cat(board_path,move(???);dims=3)
+        global move_path = parameter_path[4,1]
     end
     println(i)
+    println(move_path)
+    if move_path[end] == 0 #no more moves
+        move_path = move_path[1:end-1]
+        move_path[end] -= 1
+        parameter_path = parameter_path[:,:,1:end-1]
+        board_path = board_path[:,:,1:end-1]
+        println("move_path is 0")
+    else
+        println("do magic")
+        board_path = cat(board_path,domove(getmoves(parameter_path[:,:,end]),move_path[end]);dims=3)
+        #println("domove")
+        parameter_path = cat(parameter_path,get_parameters(board_path[:,:,end]);dims=3)
+        #println("get_parameters")
+        move_path = vcat(move_path,parameter_path[4,1,end])
+        println("move_path")
+        println(move_path)
+        loopcheck(board_path)
+        if loop #do something when a loop is deteceted
+            move_path[end] -= 1
+            global counter += 1
+            loop = false
+        end
+    end
+    if i >= 13500
+        sleep(0.1)
+    end
+    #if counter == 3
+    #    break
+    #end
     test_endcondition(parameter_path[:,:,end]) #if true, keep_going -> false and the loop ends.
     global i += 1
 end
