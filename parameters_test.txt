@@ -1,0 +1,19 @@
+0	0	1	1	1	1	1	1	1	1	1	1	1	1   startindex
+0	0	2	2	7	1	6	4	6	7	5	4	12	3   startvalue
+0	0	0	0	0	0	0	0	0	0	0	0	2	0   multiplicity
+24	0	0	0	0	0	0	0	0	0	0	0	0	0   total moves (maybe delete this line later), space for data
+0	0	4	4	4	4	4	4	4	4	4	4	4	4   target column 1
+0	0	4	4	4	4	4	4	4	4	4	4	4	4   target column 2
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 3
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 4
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 5
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 6
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 7
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 8
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 9
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 10
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 11
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 12
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 13
+0	0	0	0	0	0	0	0	0	0	0	0	0	0   target column 14
+c1  c2  c3  c4  c5  c6  c7  c8  c9  c10 c11 c12 c13 c14 declares starting column (c_nr)

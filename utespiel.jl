@@ -102,21 +102,36 @@ function restart_parameters() #restart parameters for new final while loop
     return nothing
 end
 
-function move(parameters,actualboard) #move..
-    move_number = parameters[4,1]
-    global moves = findall(>(0),parameters[5:18,:])
-    board_step = actualboard
-    startindex = 
-    board_step[]
+function getmoves(parameters) #out: moveparameters: startcolum, targetcolumn, startindex, startvalue, multiplicity, targetindex: possibmovesx6 matrix
+    moves = findall(>(0),parameters[5:18,:])
+    startcolumn, targetcolumn, startindex, startvalue, multiplicity, targetindex = Int8[], Int8[], Int8[], Int8[], Int8[], Int8[]
+    for i in moves
+        startcolumn = vcat(startcolumn,i[2])
+        targetcolumn = vcat(targetcolumn,i[1])
+        targetindex = vcat(targetindex,parameters[i[1]+4,i[2]])
+    end
+    for j in startcolumn
+        startindex = vcat(startindex,parameters[1,j])
+        startvalue = vcat(startvalue,parameters[2,j])
+        multiplicity = vcat(multiplicity,parameters[3,j])
+    end
+    moveparameters = hcat(startcolumn,hcat(targetcolumn,hcat(startindex,hcat(startvalue,hcat(multiplicity,hcat(targetindex))))))
+    return moveparameters
 end
+
 
 #Comments
 #delete the last element of an vector
-deleteat!(vector,length(vector))
+#deleteat!(vector,length(vector))
 
 #for multidimensional
-a = zeros(3,3,3)
-a = a[:,:,1:end-1]
+#a = zeros(3,3,3)
+#a = a[:,:,1:end-1]
+
+#write data to file
+#open("parameters_test.txt","w") do io
+#    writedlm(io,parameter_path)
+#end
 
 
 #starting
