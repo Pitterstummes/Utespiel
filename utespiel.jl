@@ -113,10 +113,7 @@ a = a[:,:,1:end-1]
 
 #starting
 
-parameter_path = get_parameters(board)
-board_path = "..."
-move(parameter_path,board)
-test_endcondition(parameter_path)
+#test
 
 keep_going = true
 i = 0
