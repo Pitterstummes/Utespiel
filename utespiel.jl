@@ -1,18 +1,17 @@
 #Initializing
 using DelimitedFiles
-cd("C:\\Users\\paulk\\Documents\\Programmieren\\Julia\\Ute Spiel") #home
+
+#Directory
+cd("C:\\Users\\paulk\\Documents\\Programmieren\\Julia\\Utespiel") #home
 #cd("C:\\Users\\StandardUser\\Documents\\Julia\\ute") #uni
 
+#Color assignment
 #colors = ((1,"gelb"),(2,"grau"),(3,"dunkelblau"),(4,"pink"),(5,"orange"),(6,"rot"),(7,"bordeaux"),(8,"cyan"),(9,"lila"),(10,"grün"),(11,"hellblau"),(12,"schwarz"))
 
 #load board like in level 1267
-board = readdlm("board.txt",Int8)
-
-#cat(test,parameters;dims=3)
-#possible = (sum(x->x>0,movepossibilitiesout))
+board = readdlm("level_1267.txt",Int8)
 
 #functions
-
 function get_parameters(actualboard) # get needed parameters
     parameters = zeros(Int8,18,14) #18*14 matrix containing startindex, value, multiplicity and targetindex.
     #parameters matrix 18 x 14: Columns are startcolumns, 1st row is startindex, 2nd row is startvalue, 3rd row is multiplicity, 4th row for data and 5th-18th row are targetindices
@@ -80,14 +79,14 @@ function get_parameters(actualboard) # get needed parameters
     return parameters
 end
 
-function test_endcondition(parameters) #end while loop, when end condition is met
+function test_endcondition(parameters) #end final while loop, when end condition is met
     if length(findall(==(3),parameters[3,:])) == 12 || i == 12 #part with i is for testing
         global keep_going = false
         println("Job done")
     end       
 end
 
-function loopcheck(actual_boardpath) #check for equal boards 
+function loopcheck(actual_boardpath) #check for equal boards (loops)
     for i in length(actual_boardpath[1,1,:])-1
         if actual_boardpath[:,:,i] == actual_boardpath[:,:,end]
             println("Loop detected: current board (nr ",length(actual_boardpath[1,1,:]),") is equal to nr ",i)
@@ -95,6 +94,13 @@ function loopcheck(actual_boardpath) #check for equal boards
         end        
     end  
 end  
+
+function restart_parameters() #restart parameters for new final while loop
+    global keep_going = true
+    global i = 0
+    global move_path = Int8[]
+    return nothing
+end
 
 function move(parameters,actualboard) #move..
     move_number = parameters[4,1]
@@ -104,8 +110,10 @@ function move(parameters,actualboard) #move..
     board_step[]
 end
 
+#Comments
 #delete the last element of an vector
 deleteat!(vector,length(vector))
+
 #for multidimensional
 a = zeros(3,3,3)
 a = a[:,:,1:end-1]
@@ -113,11 +121,7 @@ a = a[:,:,1:end-1]
 
 #starting
 
-#test
-
-keep_going = true
-i = 0
-move_path = Int8[] #hcat possible moves for the i-th board. If no more moves, reduce the last index by 1 -> go new path. 
+restart_parameters()
 
 while keep_going #actual running code
     if i == 0
@@ -127,7 +131,7 @@ while keep_going #actual running code
     else
         global parameter_path = cat(parameter_path,get_parameters(board_path[:,:,end]);dims=3)
         global move_path = hcat(move_path,parameter_path[4,1,end])
-        global board_path = cat(board_path,move(???);dims=3)
+        #global board_path = cat(board_path,move(???);dims=3)
     end
     println(i)
     test_endcondition(parameter_path[:,:,end]) #if true, keep_going -> false and the loop ends.
