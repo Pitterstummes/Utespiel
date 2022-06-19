@@ -149,6 +149,7 @@ end
 #end
 
 show(stdout, "text/plain", board_path)
+board_path
 
 #starting
 #load board like in level 1267
@@ -161,9 +162,9 @@ while keep_going #actual running code
         global parameter_path = get_parameters(board_path)
         global move_path = parameter_path[4,1]
     end
-    #if mod(i,10000) == 0
-    #    println(i)
-    #end
+    if mod(i,100000) == 0
+        println(i)
+    end
     #println(move_path)
     if move_path[end] == 0 #no more moves
         move_path = move_path[1:end-1]
@@ -200,4 +201,5 @@ while keep_going #actual running code
     #end
     test_endcondition(parameter_path[:,:,end]) #if true, keep_going -> false and the loop ends.
     global i += 1
+    break
 end
