@@ -1,6 +1,5 @@
 #Initializing
 using DelimitedFiles
-using Images
 #Directory
 cd("C:\\Users\\paulk\\Documents\\Programmieren\\Julia\\Utespiel") #home
 #cd("C:\\Users\\StandardUser\\Documents\\Julia\\ute") #uni
@@ -83,16 +82,38 @@ function test_endcondition(parameters) #end final while loop, when end condition
     end       
 end
 
-function loopcheck(actual_boardpath) #check for equal boards (loops)
+function loopcheck(actual_boardpath) #check for equal boards (loops) (OLD)
     for i in 1:length(actual_boardpath[1,1,:])-1
         if actual_boardpath[:,:,i] == actual_boardpath[:,:,end]
             println("Loop detected: current board (nr ",length(actual_boardpath[1,1,:]),") is equal to nr ",i)
             #break #maybe make this a comment to see multiple loops
             global loopcounter += 1
             global loop = true
+            if loop #do something when a loop is deteceted
+                move_path[end] -= 1
+                global counter += 1
+                if loopcounter == 2
+                    move_path[end] -= 1
+                end
+                global loopcounter = 0
+                loop = false
+                #when loop deteceted, jump back to the first similar board, and reduce path and moves accordingly ---- todo !!!!!!!!
+            end
         end        
     end  
 end  
+
+function loopckeck_return(actual_board) #check for loop and jump back to the first unique setup (NEW)
+    for i in 1:length(actual_board[1,1,:])-1
+        if actual_board[:,:,i] == actual_board[:,:,end]
+            #println("Loop detected: current board (nr ",length(actual_board[1,1,:]),") is equal to nr ",i)
+            global parameter_path = parameter_path[:,:,1:i]
+            global board_path = board_path[:,:,1:i]
+            global move_path = move_path[1:i]
+            global move_path[end] -= 1
+        end        
+    end  
+end
 
 function restart_parameters() #restart parameters for new final while loop
     global keep_going = true
@@ -135,21 +156,12 @@ function domove(movepara,movenur)
     return actualboard
 end
 
-#Comments
-#delete the last element of an vector
-#deleteat!(vector,length(vector))
-
-#for multidimensional
-#a = zeros(3,3,3)
-#a = a[:,:,1:end-1]
-
 #write data to file
 #open("parameters_test.txt","w") do io
 #    writedlm(io,parameter_path)
 #end
 
 show(stdout, "text/plain", move_path)
-board_path
 
 #starting
 #load board like in level 1267
@@ -173,8 +185,6 @@ while keep_going #actual running code
     else
         if getmoves(parameter_path[:,:,end])[move_path[end],3] + getmoves(parameter_path[:,:,end])[move_path[end],5] == 4 && 4 == getmoves(parameter_path[:,:,end])[move_path[end],6]
             move_path[end] -= 1
-        #elseif 
-        #    move_path[end] -= 1
         else  
             #println("do magic")
             board_path = cat(board_path,domove(getmoves(parameter_path[:,:,end]),move_path[end]);dims=3)
@@ -183,26 +193,13 @@ while keep_going #actual running code
             #println("get_parameters")
             move_path = vcat(move_path,parameter_path[4,1,end])
             #println("move_path")
-            if mod(i,1) == 0
+            if mod(i,1000) == 0
                 println(move_path)
             end
-            loopcheck(board_path)
-            if loop #do something when a loop is deteceted
-                move_path[end] -= 1
-                global counter += 1
-                if loopcounter == 2
-                    move_path[end] -= 1
-                end
-                global loopcounter = 0
-                loop = false
-                #when loop deteceted, jump back to the first similar board, and reduce path and moves accordingly ---- todo !!!!!!!!
-            end
+            loopckeck_return(board_path)
         end
     end
     #sleep(0.1)
-    #if counter == 3
-    #    break
-    #end
     test_endcondition(parameter_path[:,:,end]) #if true, keep_going -> false and the loop ends.
     global i += 1
 end
