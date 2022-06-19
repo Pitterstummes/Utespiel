@@ -1,6 +1,6 @@
 #Initializing
 using DelimitedFiles
-
+using Images
 #Directory
 cd("C:\\Users\\paulk\\Documents\\Programmieren\\Julia\\Utespiel") #home
 #cd("C:\\Users\\StandardUser\\Documents\\Julia\\ute") #uni
@@ -86,7 +86,7 @@ end
 function loopcheck(actual_boardpath) #check for equal boards (loops)
     for i in 1:length(actual_boardpath[1,1,:])-1
         if actual_boardpath[:,:,i] == actual_boardpath[:,:,end]
-            #println("Loop detected: current board (nr ",length(actual_boardpath[1,1,:]),") is equal to nr ",i)
+            println("Loop detected: current board (nr ",length(actual_boardpath[1,1,:]),") is equal to nr ",i)
             #break #maybe make this a comment to see multiple loops
             global loopcounter += 1
             global loop = true
@@ -148,7 +148,7 @@ end
 #    writedlm(io,parameter_path)
 #end
 
-show(stdout, "text/plain", board_path)
+show(stdout, "text/plain", move_path)
 board_path
 
 #starting
@@ -162,9 +162,7 @@ while keep_going #actual running code
         global parameter_path = get_parameters(board_path)
         global move_path = parameter_path[4,1]
     end
-    if mod(i,100000) == 0
-        println(i)
-    end
+    #println(i)
     #println(move_path)
     if move_path[end] == 0 #no more moves
         move_path = move_path[1:end-1]
@@ -173,33 +171,38 @@ while keep_going #actual running code
         board_path = board_path[:,:,1:end-1]
         #println("move_path is 0")
     else
-        #println("do magic")
-        board_path = cat(board_path,domove(getmoves(parameter_path[:,:,end]),move_path[end]);dims=3)
-        #println("domove")
-        parameter_path = cat(parameter_path,get_parameters(board_path[:,:,end]);dims=3)
-        #println("get_parameters")
-        move_path = vcat(move_path,parameter_path[4,1,end])
-        #println("move_path")
-        #println(move_path)
-        loopcheck(board_path)
-        if loop #do something when a loop is deteceted
+        if getmoves(parameter_path[:,:,end])[move_path[end],3] + getmoves(parameter_path[:,:,end])[move_path[end],5] == 4 && 4 == getmoves(parameter_path[:,:,end])[move_path[end],6]
             move_path[end] -= 1
-            global counter += 1
-            if loopcounter == 2
-                move_path[end] -= 1
-                global loopcounter = 0
+        #elseif 
+        #    move_path[end] -= 1
+        else  
+            #println("do magic")
+            board_path = cat(board_path,domove(getmoves(parameter_path[:,:,end]),move_path[end]);dims=3)
+            #println("domove")
+            parameter_path = cat(parameter_path,get_parameters(board_path[:,:,end]);dims=3)
+            #println("get_parameters")
+            move_path = vcat(move_path,parameter_path[4,1,end])
+            #println("move_path")
+            if mod(i,1) == 0
+                println(move_path)
             end
-            global loopcounter = 0
-            loop = false
+            loopcheck(board_path)
+            if loop #do something when a loop is deteceted
+                move_path[end] -= 1
+                global counter += 1
+                if loopcounter == 2
+                    move_path[end] -= 1
+                end
+                global loopcounter = 0
+                loop = false
+                #when loop deteceted, jump back to the first similar board, and reduce path and moves accordingly ---- todo !!!!!!!!
+            end
         end
     end
-    #if i >= 13500
-    #   sleep(0.1)
-    #end
+    #sleep(0.1)
     #if counter == 3
     #    break
     #end
     test_endcondition(parameter_path[:,:,end]) #if true, keep_going -> false and the loop ends.
     global i += 1
-    break
 end
