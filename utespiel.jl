@@ -122,6 +122,7 @@ function restart_parameters() #restart parameters for new final while loop
     global loop = false
     global counter = 0
     global loopcounter = 0
+    global oldpos = 1
     return nothing
 end
 
@@ -176,6 +177,12 @@ while keep_going #actual running code
     end
     #println(i)
     #println(move_path)
+    if isodd(move_path[1]) && length(move_path) == 1
+        global board_path = board 
+        global parameter_path = get_parameters(board_path)
+        move_path[end] -= 1
+    end
+
     if move_path[end] == 0 #no more moves
         move_path = move_path[1:end-1]
         move_path[end] -= 1
@@ -193,13 +200,27 @@ while keep_going #actual running code
             #println("get_parameters")
             move_path = vcat(move_path,parameter_path[4,1,end])
             #println("move_path")
-            if mod(i,1000) == 0
-                println(move_path)
+            if mod(i,1000000) == 0
+                println(i)
             end
             loopckeck_return(board_path)
         end
     end
     #sleep(0.1)
+    if count(==(0),get_parameters(board_path[:,:,end])[1,3:14,end]) == 2 #|| count(==(0),get_parameters(board)[1,:,end]) == 1
+        open("movelog.txt","a") do k
+            write(k,"2"*"\t"*string(i)*"\t"*string(move_path)*"\n")
+        end
+    end
+    if count(==(0),get_parameters(board_path[:,:,end])[1,3:14,end]) == 1 #|| count(==(0),get_parameters(board)[1,:,end]) == 1
+        global pos = findfirst(==(0),get_parameters(board_path[:,:,end])[1,3:14,end])
+        if  pos != oldpos
+            open("movelog.txt","a") do k
+                write(k,"1"*"\t"*string(pos)*"\t"*string(i)*"\t"*string(move_path)*"\n")
+            end
+        end
+        global oldpos = pos
+    end
     test_endcondition(parameter_path[:,:,end]) #if true, keep_going -> false and the loop ends.
     global i += 1
 end
