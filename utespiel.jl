@@ -9,9 +9,9 @@ cd("C:\\Users\\StandardUser\\Documents\\Julia\\Utespiel") #uni
 
 #functions
 function get_parameters(actualboard) # get needed parameters
-    parameters = zeros(Int8,18,14) #18*14 matrix containing startindex, value, multiplicity and targetindex.
+    parameters = zeros(Int8,length(actualboard[1,:])+4,length(actualboard[1,:])) #18*14 matrix containing startindex, value, multiplicity and targetindex.
     #parameters matrix 18 x 14: Columns are startcolumns, 1st row is startindex, 2nd row is startvalue, 3rd row is multiplicity, 4th row for data and 5th-18th row are targetindices
-    for startcolumn in 1:14
+    for startcolumn in 1:length(actualboard[1,:])
         if actualboard[4,startcolumn] != 0
             startindex = findfirst(!isequal(0),actualboard[:,startcolumn])
             startvalue = actualboard[findfirst(!isequal(0),actualboard[:,startcolumn]),startcolumn]
@@ -42,7 +42,7 @@ function get_parameters(actualboard) # get needed parameters
             else
                 multiplicity = 0
             end
-            for targetcolumn in 1:14 
+            for targetcolumn in 1:length(actualboard[1,:])
                 targetindex = 0
                 if actualboard[1,targetcolumn] == 0
                     if actualboard[2,targetcolumn] == 0
@@ -67,7 +67,7 @@ function get_parameters(actualboard) # get needed parameters
         end  
     end
     #show(stdout, "text/plain", parameters) #show parameters
-    for dia in 1:14 #targetindex diagonal should be 0 (moves wont change the board)
+    for dia in 1:length(actualboard[1,:]) #targetindex diagonal should be 0 (moves wont change the board)
         parameters[dia+4,dia] = 0
     end
     moves = count(>(0),parameters[5:18,:])
@@ -127,7 +127,7 @@ function restart_parameters() #restart parameters for new final while loop
 end
 
 function getmoves(parameters) #out: moveparameters: startcolum, targetcolumn, startindex, startvalue, multiplicity, targetindex: possibmovesx6 matrix
-    moves = findall(>(0),parameters[5:18,:])
+    moves = findall(>(0),parameters[5:length(parameters[1,:])+4,:])
     startcolumn, targetcolumn, startindex, startvalue, multiplicity, targetindex = Int8[], Int8[], Int8[], Int8[], Int8[], Int8[]
     for i in moves
         startcolumn = vcat(startcolumn,i[2])
@@ -157,6 +157,19 @@ function domove(movepara,movenur)
     return actualboard
 end
 
+function movesteps(move_path,parameter_path)
+    startcolumn = Int8[]
+    targetcolumn = Int8[]
+    for i in 1:length(move_path)
+        startcolumn = vcat(startcolumn,getmoves(parameter_path[:,:,i])[move_path[i],1])
+        targetcolumn = vcat(targetcolumn,getmoves(parameter_path[:,:,i])[move_path[i],2])
+    end
+    steppath = hcat(startcolumn,targetcolumn)
+    open("movesteps.txt","w") do io
+        writedlm(io,steppath)
+    end
+end
+
 #write data to file
 #open("parameters_test.txt","w") do io
 #    writedlm(io,parameter_path)
@@ -167,6 +180,7 @@ show(stdout, "text/plain", move_path)
 #starting
 #load board like in level 1267
 board = readdlm("level_1267.txt",Int8)
+board = readdlm("level_1267_ext.txt",Int8)
 board = readdlm("level_200.txt",Int8)
 restart_parameters()
 
@@ -178,11 +192,11 @@ while keep_going #actual running code
     end
     #println(i)
     #println(move_path)
-    if isodd(move_path[1]) && length(move_path) == 1
-        global board_path = board 
-        global parameter_path = get_parameters(board_path)
-        move_path[end] -= 1
-    end
+    #if isodd(move_path[1]) && length(move_path) == 1
+    #    global board_path = board 
+    #    global parameter_path = get_parameters(board_path)
+    #    move_path[end] -= 1
+    #end
 
     if move_path[end] == 0 #no more moves
         move_path = move_path[1:end-1]
@@ -201,7 +215,7 @@ while keep_going #actual running code
             #println("get_parameters")
             move_path = vcat(move_path,parameter_path[4,1,end])
             #println("move_path")
-            #if mod(i,100000) == 0
+            #if mod(i,1) == 0
             #    println(i)
             #    println(move_path)
             #end
@@ -226,3 +240,6 @@ while keep_going #actual running code
     test_endcondition(parameter_path[:,:,end]) #if true, keep_going -> false and the loop ends.
     global i += 1
 end
+
+#where to tap the columns?
+movesteps(move_path,parameter_path)
